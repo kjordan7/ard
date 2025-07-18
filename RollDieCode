@@ -1,0 +1,104 @@
+int seed;
+const int button = 12;
+
+int buttonState;           
+int lastButtonState = LOW;    
+unsigned long lastDebounceTime = 0;   
+unsigned long debounceDelay = 50;     
+
+
+void setup()
+{
+  pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+  pinMode(8, OUTPUT);
+  pinMode(button, INPUT);
+  
+  Serial.begin (9600);
+  Serial.println("Welcome to Arduino Dice");
+  Serial.println("Press the button to roll a number");
+}
+
+int roll(){
+  Serial.println("Rolling...");
+  Serial.println(" 3...");
+  Serial.println(" 2...");
+  Serial.println(" 1...");
+  return random(1,6);
+}
+
+void displayNum(){
+  seed = roll();
+  Serial.print(" You rolled a ");
+  Serial.println(seed);
+  
+  //clear the previous display
+  for(int i =3; i<9; i++){
+    digitalWrite(i, LOW);
+  }
+  
+  if(seed ==1){
+    digitalWrite(5, HIGH);
+  }
+  if(seed ==2){
+    digitalWrite(5, HIGH);
+    digitalWrite(7, HIGH);
+  }
+  if(seed ==3){
+    digitalWrite(4, HIGH);
+    digitalWrite(7, HIGH);
+    digitalWrite(3, HIGH);
+  }
+  if(seed ==4){
+    digitalWrite(3, HIGH);
+    digitalWrite(4, HIGH);
+    digitalWrite(6, HIGH);
+    digitalWrite(8, HIGH);
+  }
+  if(seed ==5){
+    digitalWrite(3, HIGH);
+    digitalWrite(4, HIGH);
+    digitalWrite(5, HIGH);
+    digitalWrite(6, HIGH);
+    digitalWrite(7, HIGH);
+  }
+  if(seed ==6){
+    for(int i = 3; i < 9; i++){
+      digitalWrite(i, HIGH);
+    }
+  }  
+}
+
+void clearSerial(){
+  Serial.write(27);       
+  Serial.println("Press the button to roll again!");
+  Serial.println("");
+}
+
+void rollDice(){
+  int reading = digitalRead(button);
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis();
+  }
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    if (reading != buttonState) {
+      buttonState = reading;
+
+      if (buttonState == HIGH) {
+        displayNum();
+        delay(5000);
+        clearSerial();
+      }
+    }
+  }
+  lastButtonState = reading;
+}
+
+void loop()
+{
+  rollDice();
+}
